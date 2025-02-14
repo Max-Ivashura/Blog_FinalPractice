@@ -1,6 +1,30 @@
-from chapter_6_final_projects.project_1_blog.app.models.user import User
+from sqlalchemy.orm import Session
+from app.models import User
 
+def create_user(db: Session, username: str, email: str):
+    new_user = User(username=username, email=email)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)  # Обновляем объект после сохранения
+    return new_user
 
-def create_user(username, email):
-    user = User(username, email)
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(User).filter(User.id == user_id).first()
 
+def update_user(db: Session, user_id: int, username: str = None, email: str = None):
+    user = db.query(User).get(user_id)
+    if user:
+        if username:
+            user.username = username
+        if email:
+            user.email = email
+        db.commit()
+        db.refresh(user)
+    return user
+
+def delete_user(db: Session, user_id: int):
+    user = db.query(User).get(user_id)
+    if user:
+        db.delete(user)
+        db.commit()
+    return user
